@@ -1,6 +1,7 @@
 package smartshare.authenticationservice.model;
 
 
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -9,10 +10,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import smartshare.authenticationservice.constant.UserRole;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 
 @Document(collection = "registered_users")
-public class User {
+public class User implements Serializable {
 
     @Id
     private long Id;

@@ -1,5 +1,6 @@
 package smartshare.authenticationservice.controller;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
@@ -11,6 +12,7 @@ import smartshare.authenticationservice.service.AuthenticationService;
 
 import java.util.HashMap;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping(path = "/",produces = "application/json")
@@ -32,7 +34,7 @@ public class AuthenticationController {
         return new ResponseEntity<>( sample, HttpStatus.OK);
     }
     @PostMapping(value = "/signUp")
-    public  ResponseEntity<Map<String, String>> registerUserToApplication(@RequestBody User userInfo){
+    public ResponseEntity<Map<String, String>> registerUserToApplication(@RequestBody User userInfo) {
         System.out.println("inside registerUserToTheApplication");
         System.out.println(userInfo);
         User savedUser = authenticationService.registerUserToApplication(userInfo);
