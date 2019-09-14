@@ -1,13 +1,33 @@
 package smartshare.authenticationservice.model;
 
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import smartshare.authenticationservice.constant.UserRole;
 
+import javax.validation.constraints.NotNull;
 
+
+@Document(collection = "registered_users")
 public class User {
+
+    @Id
+    private long Id;
+
+    @NotNull
     private String userName;
+
+    @NotNull
+    @Field("email")
+    @Indexed(unique = true)
     private String emailAddress;
+
+    @NotNull
     private String encryptedPassword;
+
     private String userRole = UserRole.ApplicationUser.toString(); // can be intialized through constructor too. depends on scenario.
 
     public User(String userName, String emailAddress, String password) {
@@ -28,6 +48,14 @@ public class User {
         return encryptedPassword;
     }
 
+    public void setId(long id) {
+        Id = id;
+    }
+
+    public long getId() {
+        return Id;
+    }
+
     public String getUserRole() {
         return userRole;
     }
@@ -44,10 +72,12 @@ public class User {
         return encodedPassword;
     }
 
+
     @Override
     public String toString() {
         return "User{" +
-                "userName='" + userName + '\'' +
+                "Id=" + Id +
+                ", userName='" + userName + '\'' +
                 ", emailAddress='" + emailAddress + '\'' +
                 ", encryptedPassword='" + encryptedPassword + '\'' +
                 ", userRole='" + userRole + '\'' +
