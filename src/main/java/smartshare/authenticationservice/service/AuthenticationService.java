@@ -1,69 +1,35 @@
 package smartshare.authenticationservice.service;
 
-import com.fasterxml.jackson.databind.ObjectWriter;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
-import smartshare.authenticationservice.Repository.UserRepository;
-import smartshare.authenticationservice.constant.KafkaKeys;
 import smartshare.authenticationservice.model.User;
 
 @Service
 public class AuthenticationService {
 
     @Autowired
-    private UserRepository userRepository;
+    private SignUpOperations signUpOperations;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
-
-    @Autowired
-    private ObjectWriter jsonConverter;
-
-    private User addUserInformationToDatabase(User user){
-
-        try{
-            return userRepository.insert(user);
-        }
-        catch (Exception exception){
-            System.out.println(" Exception while saving user to mongo "+ exception);
-            return null;
-        }
-    }
-
-    private Boolean addUserInformationToMessagingService(User user) {
-
-        ListenableFuture<SendResult<String, String>> producerResult = null;
-        try {
-            producerResult = kafkaTemplate.send("authentication", KafkaKeys.SignUp.name(), jsonConverter.writeValueAsString(user));
-            if (!producerResult.get().getRecordMetadata().toString().isEmpty()) {
-                return true;
-            }
-        } catch (Exception exception) {
-            System.out.println(" Exception while publishing user to Kafka " + exception.getCause() + exception.getMessage());
-        }
-        return false;
+    private static Object userFunction(OperationsOnUser operationsOnUser, User user) {
+        return operationsOnUser.operationToBePerformed(user);
     }
 
     private User addUserInformationInDatabaseAndMessagingQueue(User user) {
 
-        Boolean messagePublishedToKafkaStatus = addUserInformationToMessagingService(user);
-        if (messagePublishedToKafkaStatus) {
-            return addUserInformationToDatabase(user);
+        User registeredUser = (User) userFunction(signUpOperations::addUserInformationToDatabase, user);
+        if (registeredUser.getUserOperationsResultStatus().equals("")) {
+            Boolean messagePublishedToKafkaStatus = (Boolean) userFunction(signUpOperations::addUserInformationToMessagingService, user);
+            if (!messagePublishedToKafkaStatus) {
+                System.out.println("Error in publishing " + user + "to kafka...");
+                // can implement user record recovery either from authentication side or authorization side
+            }
         }
-        return null;
+        return registeredUser;
     }
 
-    private User prepareReceivedUserInfoForPersisting(User user){
-        user.setId(userRepository.count()+1);
-        return user;
-    }
-
-    public User registerUserToApplication(User user){
-        return addUserInformationInDatabaseAndMessagingQueue(prepareReceivedUserInfoForPersisting(user));
+    public User registerUserToApplication(User user) {
+        return addUserInformationInDatabaseAndMessagingQueue((User) userFunction(signUpOperations::prepareReceivedUserInfoForPersisting, user));
     }
 
 }

@@ -32,6 +32,8 @@ public class User implements Serializable {
 
     private String userRole = UserRole.ApplicationUser.toString(); // can be intialized through constructor too. depends on scenario.
 
+    private String userOperationsResultStatus;
+
     public User(String userName, String emailAddress, String password) {
         this.userName = userName;
         this.emailAddress = emailAddress;
@@ -69,11 +71,19 @@ public class User implements Serializable {
     private String encryptPassword( String password){
 
         BCryptPasswordEncoder bcryptEncoder = new BCryptPasswordEncoder();
+        if (password == null) return "";
         String encodedPassword = bcryptEncoder.encode(password);
         System.out.println("encodedPassword " +encodedPassword);
         return encodedPassword;
     }
 
+    public String getUserOperationsResultStatus() {
+        return userOperationsResultStatus;
+    }
+
+    public void setUserOperationsResultStatus(String userOperationsResultStatus) {
+        this.userOperationsResultStatus = userOperationsResultStatus;
+    }
 
     @Override
     public String toString() {
@@ -83,6 +93,7 @@ public class User implements Serializable {
                 ", emailAddress='" + emailAddress + '\'' +
                 ", encryptedPassword='" + encryptedPassword + '\'' +
                 ", userRole='" + userRole + '\'' +
+                ", userOperationsResultStatus='" + userOperationsResultStatus + '\'' +
                 '}';
     }
 }

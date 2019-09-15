@@ -35,15 +35,20 @@ public class AuthenticationController {
     }
     @PostMapping(value = "/signUp")
     public ResponseEntity<Map<String, String>> registerUserToApplication(@RequestBody User userInfo) {
+
+        // have to implement logging
+
         System.out.println("inside registerUserToTheApplication");
-        System.out.println(userInfo);
+
         User savedUser = authenticationService.registerUserToApplication(userInfo);
-        if(null != savedUser){
+        if (null != savedUser.getUserName()) {
             resultOfOperation.put("userName", savedUser.getUserName());
             resultOfOperation.put("message", ResultStatus.Success.name());
             return new ResponseEntity<>( resultOfOperation, HttpStatus.OK);
+        } else {
+            resultOfOperation.put("message", savedUser.getUserOperationsResultStatus());
+            return new ResponseEntity<>(resultOfOperation, HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>( resultOfOperation, HttpStatus.BAD_REQUEST);
     }
 
 }
